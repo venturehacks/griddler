@@ -120,7 +120,12 @@ module Griddler
 
     def text_or_sanitized_html
       text = clean_text(params.fetch(:text, ''))
-      text.presence || clean_html(params.fetch(:html, '')).presence
+      result = text.presence || clean_html(params.fetch(:html, '')).presence
+
+      # Since Rails 6.1, param encoding is validated by default and requests with invalid chars are rejected with a 400 error.
+      # To avoid this, we need to add `skip_parameter_encoding` to EmailsController.
+      # The side effect is that params are not encoded with UTF-8 anymore, so we need to force the encoding to UTF-8.
+      result.force_encoding('utf-8')
     end
 
     def clean_text(text)
